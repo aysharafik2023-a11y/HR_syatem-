@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      HR System
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <div class="nav-section">Recruitment</div>
+      <a class="nav-item" data-page="jobs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Job Postings
+      </a>
+      <a class="nav-item" data-page="candidates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Candidates
+      </a>
+      <a class="nav-item" data-page="applications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        Applications
+      </a>
+      <a class="nav-item" data-page="pipeline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 16 4-8 4 5 4-9"/></svg>
+        Pipeline
+      </a>
+      <div class="nav-section">Knowledge</div>
+      <a class="nav-item" data-page="policies">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Policies
+      </a>
+      <a class="nav-item" data-page="chatbot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chatbot
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <h1 id="page-title">Dashboard</h1>
+      <span style="font-size:.8rem;color:var(--gray-400)">HR System v0.1.0</span>
+    </header>
+
+    <div class="content">
+      <!-- ═══════════ Dashboard ═══════════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="card">
+          <div class="card-header"><h2>Recent Applications</h2></div>
+          <div class="card-body table-wrap">
+            <table><thead><tr><th>ID</th><th>Job</th><th>Candidate</th><th>Status</th><th>Applied</th></tr></thead>
+            <tbody id="dashboard-apps"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ Jobs ═══════════ -->
+      <div class="page" id="page-jobs">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div style="display:flex;gap:.5rem;">
+            <select class="form-control" id="jobs-filter" style="width:auto;">
+              <option value="">All statuses</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('job-modal')">+ New Job</button>
+        </div>
+        <div class="card"><div class="card-body table-wrap">
+          <table><thead><tr><th>ID</th><th>Title</th><th>Department</th><th>Location</th><th>Salary</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="jobs-table"></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- ═══════════ Candidates ═══════════ -->
+      <div class="page" id="page-candidates">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+          <button class="btn btn-primary" onclick="openModal('candidate-modal')">+ New Candidate</button>
+        </div>
+        <div class="card"><div class="card-body table-wrap">
+          <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Skills</th><th>Added</th></tr></thead>
+          <tbody id="candidates-table"></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- ═══════════ Applications ═══════════ -->
+      <div class="page" id="page-applications">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+          <button class="btn btn-primary" onclick="openNewApplicationModal()">+ New Application</button>
+        </div>
+        <div class="card"><div class="card-body table-wrap">
+          <table><thead><tr><th>ID</th><th>Job</th><th>Candidate</th><th>Status</th><th>Applied</th><th>Actions</th></tr></thead>
+          <tbody id="applications-table"></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- ═══════════ Pipeline ═══════════ -->
+      <div class="page" id="page-pipeline">
+        <div class="pipeline" id="pipeline-board"></div>
+      </div>
+
+      <!-- ═══════════ Policies ═══════════ -->
+      <div class="page" id="page-policies">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div style="display:flex;gap:.5rem;flex:1;max-width:400px;">
+            <input class="form-control" id="policy-search" placeholder="Search policies...">
+            <button class="btn btn-secondary" onclick="searchPolicies()">Search</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('policy-modal')">+ Upload Policy</button>
+        </div>
+        <div id="policy-search-results" style="margin-bottom:1rem;"></div>
+        <div class="card"><div class="card-body table-wrap">
+          <table><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Version</th><th>Uploaded</th><th>Actions</th></tr></thead>
+          <tbody id="policies-table"></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- ═══════════ Chatbot ═══════════ -->
+      <div class="page" id="page-chatbot">
+        <div class="card chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg bot">Hi! I'm the HR Policy Assistant. Ask me any question about company policies.</div>
+          </div>
+          <div class="chat-input-row">
+            <input class="form-control" id="chat-input" placeholder="Ask about company policies..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn btn-primary" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ Modals ═══════════ -->
+
+<!-- New Job -->
+<div class="modal-overlay" id="job-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>New Job Posting</h3><button class="modal-close" onclick="closeModal('job-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Title</label><input class="form-control" id="job-title"></div>
+      <div class="form-group"><label>Description</label><textarea class="form-control" id="job-desc"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Department</label><input class="form-control" id="job-dept"></div>
+        <div class="form-group"><label>Location</label><input class="form-control" id="job-loc"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Salary Min</label><input class="form-control" id="job-sal-min" type="number"></div>
+        <div class="form-group"><label>Salary Max</label><input class="form-control" id="job-sal-max" type="number"></div>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select class="form-control" id="job-status">
+          <option value="draft">Draft</option><option value="open">Open</option><option value="closed">Closed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('job-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createJob()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Candidate -->
+<div class="modal-overlay" id="candidate-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>New Candidate</h3><button class="modal-close" onclick="closeModal('candidate-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Name</label><input class="form-control" id="cand-name"></div>
+        <div class="form-group"><label>Email</label><input class="form-control" id="cand-email" type="email"></div>
+      </div>
+      <div class="form-group"><label>Phone</label><input class="form-control" id="cand-phone"></div>
+      <div class="form-group"><label>Skills</label><input class="form-control" id="cand-skills" placeholder="Python, JavaScript, ..."></div>
+      <div class="form-group"><label>Resume Text</label><textarea class="form-control" id="cand-resume"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('candidate-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createCandidate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Application -->
+<div class="modal-overlay" id="application-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>New Application</h3><button class="modal-close" onclick="closeModal('application-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Job Posting</label><select class="form-control" id="app-job"></select></div>
+      <div class="form-group"><label>Candidate</label><select class="form-control" id="app-candidate"></select></div>
+      <div class="form-group"><label>Cover Letter</label><textarea class="form-control" id="app-cover"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('application-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createApplication()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Application Status -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>Update Status</h3><button class="modal-close" onclick="closeModal('status-modal')">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="status-app-id">
+      <div class="form-group"><label>New Status</label>
+        <select class="form-control" id="status-select">
+          <option value="applied">Applied</option><option value="screening">Screening</option>
+          <option value="interview">Interview</option><option value="offer">Offer</option>
+          <option value="hired">Hired</option><option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('status-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateApplicationStatus()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Policy -->
+<div class="modal-overlay" id="policy-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>Upload Policy Document</h3><button class="modal-close" onclick="closeModal('policy-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Title</label><input class="form-control" id="policy-title"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label><input class="form-control" id="policy-category" placeholder="e.g. workplace, benefits"></div>
+        <div class="form-group"><label>Version</label><input class="form-control" id="policy-version" value="1.0"></div>
+      </div>
+      <div class="form-group"><label>Content</label><textarea class="form-control" id="policy-content" rows="8"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('policy-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="uploadPolicy()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Policy -->
+<div class="modal-overlay" id="view-policy-modal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="view-policy-title"></h3><button class="modal-close" onclick="closeModal('view-policy-modal')">&times;</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:.5rem;"><span class="badge badge-open" id="view-policy-cat"></span> <span style="font-size:.8rem;color:var(--gray-500)" id="view-policy-ver"></span></div>
+      <div id="view-policy-content" style="white-space:pre-wrap;font-size:.875rem;line-height:1.6;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
