@@ -2,12 +2,15 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from hr_system.app import app
+from hr_system.app import app as hr_app
 from hr_system.database import Base, get_db
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Use in-memory SQLite for tests
+from app.main import app
+
+# Sync fixtures for hr_system tests
 TEST_DATABASE_URL = "sqlite:///./test_hr_system.db"
 engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -32,10 +35,18 @@ def setup_db():
 @pytest.fixture
 def client():
     """Test client with overridden database dependency."""
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
+    hr_app.dependency_overrides[get_db] = override_get_db
+    with TestClient(hr_app) as c:
         yield c
-    app.dependency_overrides.clear()
+    hr_app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def async_client():
+    """Async test client for app module tests."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac
 
 
 @pytest.fixture

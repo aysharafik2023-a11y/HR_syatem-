@@ -11,6 +11,10 @@ build/
 .venv/
 venv/
 env/
+ENV/
+
+# Environment
+.env
 
 # Database files
 *.db
