@@ -74,7 +74,9 @@ class MatchingEngine:
                 return float(match.group(1))
         return None
 
-    def compute_match(self, resume_text: str, job_description: str, job_requirements: str) -> MatchResult:
+    def compute_match(
+        self, resume_text: str, job_description: str, job_requirements: str
+    ) -> MatchResult:
         """Compute match score between a resume and job posting.
 
         Returns a MatchResult with scores from 0.0 to 1.0.
