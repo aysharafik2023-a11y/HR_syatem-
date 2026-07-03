@@ -1,6 +1,15 @@
-# HR Resume Screening System
+# HR System API
 
-AI-powered resume screening system that processes 10,000+ resumes per month. Reads resumes (PDF/DOCX), matches them to job descriptions using NLP, ranks candidates, stores results, and exposes a REST API for HR portal integration.
+Production-ready FastAPI application for HR management with AI-powered resume screening.
+
+## Tech Stack
+
+- **Python 3.12** + **FastAPI**
+- **PostgreSQL** with **SQLAlchemy** (async)
+- **Alembic** for database migrations
+- **JWT** authentication (PyJWT + bcrypt)
+- **Docker** + **Docker Compose**
+- **AI Matching Engine** (TF-IDF + NLP skill extraction)
 
 ## Architecture
 
@@ -14,24 +23,54 @@ AI-powered resume screening system that processes 10,000+ resumes per month. Rea
 │  (PDF/DOCX) │   (TF-IDF +     │   (Score + Rank        │
 │             │    Skills NLP)   │    candidates)         │
 ├─────────────┴──────────────────┴────────────────────────┤
-│              SQLAlchemy ORM + SQLite/PostgreSQL           │
+│              SQLAlchemy ORM + PostgreSQL                  │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ## Quick Start
 
+### With Docker
+
 ```bash
-# Install dependencies
-pip install -e ".[dev]"
-
-# Run the server
-uvicorn hr_system.app:app --host 0.0.0.0 --port 8000
-
-# Open API docs
-# http://localhost:8000/docs
+cp .env.example .env
+docker compose up --build
 ```
 
+The API will be available at `http://localhost:8000`.
+
+### Local Development
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e ".[dev]"
+
+# Start PostgreSQL (or use docker compose up db)
+# Run migrations
+alembic upgrade head
+
+# Start the server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## API Documentation
+
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
 ## API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/register` | Register a new user |
+| POST | `/api/v1/auth/login` | Login and get JWT token |
+
+### Users
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/users/me` | Get current user profile |
 
 ### Job Postings
 | Method | Endpoint | Description |
@@ -58,65 +97,48 @@ uvicorn hr_system.app:app --host 0.0.0.0 --port 8000
 | PATCH | `/api/v1/screening/applications/{id}/status` | Update application status |
 | GET | `/api/v1/screening/statistics/{job_id}` | Get screening statistics |
 
-## Usage Example
+### Health
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/health` | Health check |
 
-```bash
-# 1. Create a job posting
-curl -X POST http://localhost:8000/api/v1/jobs/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Senior Python Developer",
-    "department": "Engineering",
-    "description": "Build scalable backend services...",
-    "requirements": "5+ years Python, Django/FastAPI, PostgreSQL, Docker"
-  }'
+## Project Structure
 
-# 2. Upload a resume
-curl -X POST http://localhost:8000/api/v1/resumes/upload \
-  -F "file=@resume.pdf" \
-  -F "candidate_name=Jane Smith" \
-  -F "candidate_email=jane@example.com"
-
-# 3. Run AI screening
-curl -X POST http://localhost:8000/api/v1/screening/run/1?top_n=10
-
-# 4. Get ranked results
-curl http://localhost:8000/api/v1/screening/results/1
+```
+app/
+├── api/          # Route handlers and dependencies
+├── database/     # Database engine, session, base model
+├── models/       # SQLAlchemy ORM models
+├── prompts/      # AI/LLM prompt templates
+├── schemas/      # Pydantic request/response schemas
+├── services/     # Business logic layer
+├── config.py     # Application settings
+└── main.py       # FastAPI application entry point
+hr_system/        # Resume screening engine
+alembic/          # Database migration scripts
+tests/            # Test suite
 ```
 
-## AI Matching Engine
+## Environment Variables
 
-The system uses a multi-signal approach:
-- **TF-IDF Cosine Similarity (40%)**: Content-level matching between resume and job description
-- **Skill Extraction & Matching (40%)**: NLP-based technical skill identification and comparison
-- **Experience Matching (20%)**: Years of experience extraction and comparison
-
-Scoring is 0.0–1.0, with candidates ranked by overall score.
-
-## Development
-
-```bash
-# Run tests
-pytest --tb=short -q
-
-# Run linter
-ruff check hr_system/ tests/
-
-# Fix lint issues
-ruff check --fix hr_system/ tests/
-```
-
-## Configuration
-
-Environment variables (prefix `HR_`):
+See `.env.example` for all available configuration options.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HR_DATABASE_URL` | `sqlite:///./hr_system.db` | Database connection string |
+| `DATABASE_URL` | `postgresql+asyncpg://...` | Database connection string |
+| `SECRET_KEY` | `change-me-in-production` | JWT signing key |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Token expiration |
 | `HR_UPLOAD_DIR` | `./uploads` | Resume file storage directory |
 | `HR_MAX_FILE_SIZE_MB` | `10` | Maximum upload file size |
 
-For PostgreSQL in production:
+## Running Tests
+
 ```bash
-export HR_DATABASE_URL="postgresql://user:pass@host:5432/hr_db"
+pytest --tb=short -q
+```
+
+## Linting
+
+```bash
+ruff check app/ tests/
 ```
