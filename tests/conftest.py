@@ -1,14 +1,13 @@
 """Test fixtures and configuration."""
 
 import pytest
+from app.main import app
 from fastapi.testclient import TestClient
 from hr_system.app import app as hr_app
 from hr_system.database import Base, get_db
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from app.main import app
 
 # Sync fixtures for hr_system tests
 TEST_DATABASE_URL = "sqlite:///./test_hr_system.db"
