@@ -1,28 +1,35 @@
-"""FastAPI application entry point."""
+"""FastAPI application for the AI Resume Screening System."""
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
-from hr_system.api import jobs, resumes, screening
-from hr_system.config import settings
-from hr_system.database import init_db
+from hr_system.database import get_db, init_db
+from hr_system.models import Candidate, Job
+from hr_system.routers import jobs, resumes, screening
+from hr_system.schemas import HealthResponse
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Initialize database tables on application startup."""
+async def lifespan(application: FastAPI):
+    """Initialize the database on application startup."""
     init_db()
+    logger.info("Database initialized.")
+    logger.info("AI Resume Screening System is ready.")
     yield
 
 
 app = FastAPI(
-    title=settings.app_name,
+    title="AI Resume Screening System",
     description=(
-        "AI-powered resume screening system that reads resumes, matches them to "
-        "job descriptions, ranks candidates, and provides an API for HR portals. "
-        "Designed to handle 10,000+ resumes per month."
+        "An AI-powered system that reads resumes, matches them to job descriptions, "
+        "ranks candidates, and provides an API for HR portals. "
+        "Processes 10,000+ resumes/month with semantic AI matching."
     ),
     version="1.0.0",
     docs_url="/docs",
@@ -30,38 +37,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware for HR portal integration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include API routers
-app.include_router(jobs.router, prefix="/api/v1")
-app.include_router(resumes.router, prefix="/api/v1")
-app.include_router(screening.router, prefix="/api/v1")
+app.include_router(resumes.router)
+app.include_router(jobs.router)
+app.include_router(screening.router)
 
 
-@app.get("/")
-def root():
-    """Health check and API information."""
-    return {
-        "name": settings.app_name,
-        "version": "1.0.0",
-        "status": "running",
-        "docs": "/docs",
-        "endpoints": {
-            "jobs": "/api/v1/jobs",
-            "resumes": "/api/v1/resumes",
-            "screening": "/api/v1/screening",
-        },
-    }
-
-
-@app.get("/health")
+@app.get("/", response_model=HealthResponse)
 def health_check():
-    """Health check endpoint for monitoring."""
-    return {"status": "healthy"}
+    """Health check endpoint with system stats."""
+    db: Session = next(get_db())
+    try:
+        total_candidates = db.query(Candidate).count()
+        total_jobs = db.query(Job).count()
+    finally:
+        db.close()
+
+    return HealthResponse(
+        status="healthy",
+        version="1.0.0",
+        total_candidates=total_candidates,
+        total_jobs=total_jobs,
+    )
