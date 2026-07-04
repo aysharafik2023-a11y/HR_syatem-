@@ -1,91 +1,117 @@
-"""Test fixtures and configuration."""
+"""Test configuration and fixtures."""
 
 import pytest
+from app.core.security import create_access_token, hash_password
+from app.database.base import Base
+from app.database.session import get_db
+from app.main import app
+from app.models.user import User, UserRole
 from fastapi.testclient import TestClient
-from hr_system.app import app
-from hr_system.database import Base, get_db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-# Use in-memory SQLite for tests
-TEST_DATABASE_URL = "sqlite:///./test_hr_system.db"
-engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+TEST_DATABASE_URL = "sqlite:///./test.db"
 
-
-def override_get_db():
-    db = TestSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+engine = create_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 @pytest.fixture(autouse=True)
-def setup_db():
-    """Create fresh database tables for each test."""
+def setup_database():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture
-def client():
-    """Test client with overridden database dependency."""
+def db_session():
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+@pytest.fixture
+def client(db_session):
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
+
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
-        yield c
+    with TestClient(app) as test_client:
+        yield test_client
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def db_session():
-    """Direct database session for test setup."""
-    db = TestSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def test_user(db_session) -> User:
+    user = User(
+        email="agent@test.com",
+        username="testagent",
+        full_name="Test Agent",
+        hashed_password=hash_password("testpass123"),
+        role=UserRole.AGENT,
+        is_active=True,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
 
 
 @pytest.fixture
-def sample_job_posting():
-    """Sample job posting data."""
-    return {
-        "title": "Senior Python Developer",
-        "department": "Engineering",
-        "description": (
-            "We are looking for an experienced Python developer to join our backend team. "
-            "You will design and implement scalable microservices, work with databases, "
-            "and collaborate with cross-functional teams."
-        ),
-        "requirements": (
-            "5+ years of experience with Python. Strong knowledge of Django or FastAPI. "
-            "Experience with PostgreSQL, Redis, and Docker. Familiarity with AWS services. "
-            "Understanding of CI/CD pipelines and agile methodologies."
-        ),
-        "preferred_skills": "Machine learning, Kubernetes, GraphQL",
-        "location": "Remote",
-    }
+def admin_user(db_session) -> User:
+    user = User(
+        email="admin@test.com",
+        username="testadmin",
+        full_name="Test Admin",
+        hashed_password=hash_password("adminpass123"),
+        role=UserRole.ADMIN,
+        is_active=True,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
 
 
 @pytest.fixture
-def sample_candidate():
-    """Sample candidate data matching the senior Python role."""
-    return {
-        "name": "Jane Smith",
-        "email": "jane.smith@example.com",
-        "phone": "+1-555-0123",
-        "resume_text": (
-            "Jane Smith - Senior Software Engineer\n"
-            "7 years of experience in software development.\n\n"
-            "Skills: Python, Django, FastAPI, PostgreSQL, Redis, Docker, AWS, "
-            "Kubernetes, CI/CD, Git, Linux, REST API, microservices, agile.\n\n"
-            "Experience:\n"
-            "- Led team of 5 developers building microservices architecture\n"
-            "- Designed and implemented REST APIs serving 1M+ requests/day\n"
-            "- Managed PostgreSQL databases with 100GB+ data\n"
-            "- Deployed applications on AWS using Docker and Kubernetes\n\n"
-            "Education: M.S. Computer Science, Stanford University"
-        ),
-    }
+def manager_user(db_session) -> User:
+    user = User(
+        email="manager@test.com",
+        username="testmanager",
+        full_name="Test Manager",
+        hashed_password=hash_password("managerpass123"),
+        role=UserRole.MANAGER,
+        is_active=True,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+
+@pytest.fixture
+def auth_headers(test_user) -> dict:
+    token = create_access_token(data={"sub": str(test_user.id), "role": test_user.role.value})
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def admin_auth_headers(admin_user) -> dict:
+    token = create_access_token(data={"sub": str(admin_user.id), "role": admin_user.role.value})
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def manager_auth_headers(manager_user) -> dict:
+    token = create_access_token(data={"sub": str(manager_user.id), "role": manager_user.role.value})
+    return {"Authorization": f"Bearer {token}"}

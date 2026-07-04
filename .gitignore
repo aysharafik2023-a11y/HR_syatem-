@@ -1,10 +1,11 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 *.egg-info/
 dist/
 build/
-*.egg
 .eggs/
 
 # Virtual environments
@@ -12,26 +13,42 @@ build/
 venv/
 env/
 
-# Database files
-*.db
-
-# Uploaded resumes
-uploads/
-
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# Docker
+docker-compose.override.yml
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Testing
+# Pytest
 .pytest_cache/
-.coverage
-htmlcov/
 
-# Ruff
-.ruff_cache/
+# mypy
+.mypy_cache/
+
+# Alembic
+alembic/versions/__pycache__/
