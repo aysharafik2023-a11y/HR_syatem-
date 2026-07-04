@@ -1,7 +1,7 @@
 """Ticket model."""
 
-import enum
 from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
 
 
-class TicketCategory(str, enum.Enum):
+class TicketCategory(StrEnum):
     BILLING = "billing"
     TECHNICAL_ISSUE = "technical_issue"
     BUG_REPORT = "bug_report"
@@ -18,14 +18,14 @@ class TicketCategory(str, enum.Enum):
     GENERAL = "general"
 
 
-class TicketPriority(str, enum.Enum):
+class TicketPriority(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
 
-class TicketStatus(str, enum.Enum):
+class TicketStatus(StrEnum):
     OPEN = "open"
     IN_PROGRESS = "in_progress"
     WAITING_ON_CUSTOMER = "waiting_on_customer"
@@ -34,7 +34,7 @@ class TicketStatus(str, enum.Enum):
     CLOSED = "closed"
 
 
-class TicketChannel(str, enum.Enum):
+class TicketChannel(StrEnum):
     WEB_PORTAL = "web_portal"
     EMAIL = "email"
     MOBILE_APP = "mobile_app"

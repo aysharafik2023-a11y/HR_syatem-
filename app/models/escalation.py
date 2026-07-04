@@ -1,7 +1,7 @@
 """Escalation model."""
 
-import enum
 from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,14 +9,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
 
 
-class EscalationReason(str, enum.Enum):
+class EscalationReason(StrEnum):
     CRITICAL_PRIORITY = "critical_priority"
     NEGATIVE_SENTIMENT = "negative_sentiment"
     SLA_BREACH = "sla_breach"
     MANUAL = "manual"
 
 
-class EscalationStatus(str, enum.Enum):
+class EscalationStatus(StrEnum):
     PENDING = "pending"
     ACKNOWLEDGED = "acknowledged"
     RESOLVED = "resolved"

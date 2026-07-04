@@ -1,7 +1,7 @@
 """User model."""
 
-import enum
 from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import Boolean, DateTime, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
 
 
-class UserRole(str, enum.Enum):
+class UserRole(StrEnum):
     ADMIN = "admin"
     MANAGER = "manager"
     AGENT = "agent"
